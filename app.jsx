@@ -131,7 +131,11 @@ function TopBar({ lang, setLang, nameMode, setNameMode, showSide, setShowSide, f
       <div className="brand" onClick={() => window.open('README Preview.html', '_blank')} style={{ cursor: 'pointer' }} title="Open the guide (README)">
         <img className="brand-logo" src="assets/logo-myfamily.svg" alt="My Family Story" draggable="false" />
         <span className="app-title">My Family Story</span>
-        <span className="app-sub">a living record · 1903–present</span>
+        <span className="app-sub">{(() => {
+          const R = window.REL;
+          if (!R || !R.F.people.length) return 'a living record';
+          return `a living record · ${R.MIN_YEAR}–present`;
+        })()}</span>
       </div>
       <div className="top-spacer" />
       <div className="top-controls">

@@ -3,6 +3,9 @@
 > **Read this first when opening a new session.** It says where we are, what's
 > next, and the conventions this project runs on. Companion docs: `CLAUDE.md`
 > (how the app + change-set baking works) and `README.md` (the app itself).
+>
+> **Maintenance:** keep the Status table and Session log below current — update
+> them whenever the family data changes (this is also wired into `CLAUDE.md`).
 
 Last updated: **2026-10-20**
 

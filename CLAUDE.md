@@ -1,5 +1,9 @@
 # Family Tree — working notes
 
+> **Start here:** `PROJECT.md` = the goals & current status of this family's
+> record (read it first, and KEEP IT UPDATED — refresh its status table + add a
+> session-log entry whenever the family data changes).
+
 ## Change tracking & publish ("chat = server, baseline = database")
 Same system as the Execution Status project: local edits accumulate as ops,
 the user copies a change-set from the Save dialog and pastes it in the chat,
@@ -80,6 +84,12 @@ and Claude "bakes" it into the shared baseline.
      `excluded` overrides that were baked, and set `seedStamp`/`baseV` to the new values.
 6. No bundling step — the app loads `tree-seed.js` directly. Confirm with a short summary
    ("Baked N changes → v{baseV}").
+7. **Update `PROJECT.md`**: refresh the status table (people / unions / side-links /
+   photo counts / timeline range / `baseV` / app version) and append a dated session-log
+   entry describing what changed. Do this for ANY family-data change — a bake, a person
+   added directly in chat, a photo, a new world event. It is the handoff doc for the next
+   session. (App-only changes are logged in `CHANGELOG.md` instead; still worth a line here
+   if they affect how the family data is worked on.)
 Idempotent: re-pasting the same change-set finds nothing new to bake (ops already removed).
 
 ## User-authored moments (undated-friendly)

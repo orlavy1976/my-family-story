@@ -26,15 +26,16 @@ Scope of "done", roughly:
 
 ## Status right now
 
-**One person on the tree: me (Or Lavy).** Everything else is empty and waiting.
+**Three people: me and my parents.** The tree has its real roots; grandparents
+are the next frontier (that's what pushes us back toward ~1900).
 
 | | |
 |---|---|
-| People | **1** — `or` = Or Lavy, b. 1976 |
-| Unions | 0 |
+| People | **3** — `israel`, `ruthi` (gen 0) · `or` (gen 1) |
+| Unions | 1 — Israel & Ruthi (year unknown) |
 | Side-links | 0 |
 | Home people photos | 0 |
-| Timeline range | 1976 → 2026 |
+| Timeline range | 1946 → 2026 |
 | Baseline version | `baseV 34` (`tree-seed.js`) |
 | App version | v1.1.2 |
 | Pending change-set | none (sidecars clean) |
@@ -44,19 +45,26 @@ handle an empty tree properly, so this is a clean start.
 
 ## Next steps (rough order)
 
-1. **Add my parents** — the next gen-0 pair. Gives the tree its real roots.
-2. **Add my grandparents** on both sides (4 people) — pushes the record back
-   toward the early 1900s, which is the stated goal.
-3. **Siblings, spouse/partner, children** — fill out the middle generations.
-4. **Great-grandparents / great-aunts** as remembered — care with spelling.
-5. **Photos**: scan and drop in, one person at a time (in-app crop is best).
-6. **Stories & world events**: once names are in, add the era they lived
+1. **Grandparents** on both sides (4 people) — this is the step that reaches
+   back toward the early 1900s, the stated goal. Need names + rough years;
+   the Germany-born / pre-state-Palestine generation likely has a migration
+   story worth recording.
+2. **Siblings, spouse/partner, children** — fill out the middle generations.
+3. **Great-grandparents / great-aunts** as remembered — care with spelling.
+4. **Photos**: scan and drop in, one person at a time (in-app crop is best).
+5. **Stories & world events**: once names are in, add the era they lived
    through (aliyot, wars, migrations, professions).
 
+Known gaps to ask about:
+- Israel & Ruthi's **marriage year** (currently unset → shows "Married").
+- Ruthi's **birthplace** — recorded only as "Germany"; if it was a post-war
+  Displaced Persons camp, that's worth naming.
+- Exact dates are stored in story text (see open question below).
+
 Open question we hit early: **exact dates.** The data model stores
-`birth.year` only — no month/day field anywhere. Today "30 January 1976" lives
-in my birth *story* text. If day-level dates matter (birthdays etc.), that's an
-app feature to add — not yet decided.
+`birth.year` only — no month/day field anywhere. Dates live in the birth/death
+*story* text. If day-level dates matter (birthdays etc.), that's an app feature
+to add — not yet decided.
 
 ---
 
@@ -123,3 +131,12 @@ Must be served over HTTP (not `file://`) — the app fetches its own JSON/JSX.
   Timeline now 1976 → present; top-bar subtitle made dynamic.
 - Baby photo (`~/Downloads/A6023121_002.jpg`, 1600×1060) **not added** — the
   model can't see images; add it via the app so the crop can be set visually.
+- Added `PROJECT.md` (this file) and wired it into `CLAUDE.md` as the
+  read-first handoff doc, with a rule to keep it current.
+- **Added parents (commit `45261bd`):** `israel` = Israel Lavy, b. 31/12/1946 at
+  **Kibbutz Shamir** (gen 0); `ruthi` = Ruthi Lavy, b. 17/8/1946 in **Germany**,
+  d. 9/12/1999. Union `u_israel_ruthi` (year unknown). `or` moved to gen 1,
+  parents `[israel, ruthi]`. Timeline now 1946 → present.
+  - Two bugs fixed along the way: `MIN_YEAR` went `NaN` when a union had no
+    year (undefined poisoned `Math.min`); and the marriage label rendered
+    "Married · undefined" for an undated union.

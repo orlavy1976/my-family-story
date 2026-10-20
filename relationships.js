@@ -98,9 +98,11 @@
 
   // ---------- event range ----------
   const allYears = [];
-  F.people.forEach(p => { allYears.push(p.birth.year); if (p.death) allYears.push(p.death.year); });
+  F.people.forEach(p => { if (p.birth && p.birth.year != null) allYears.push(p.birth.year); if (p.death && p.death.year != null) allYears.push(p.death.year); });
   F.unions.forEach(u => allYears.push(u.year));
-  const MIN_YEAR = Math.min(...allYears);
+  // Empty tree → no years yet. Start the window at the current year so the
+  // scrubber/timeline stay on a sane, finite scale before the first person lands.
+  const MIN_YEAR = allYears.length ? Math.min(...allYears) : NOW;
   const MAX_YEAR = NOW;
 
   // age of person at a given year (clamped to death). returns null if not yet born.
@@ -156,6 +158,7 @@
   // category drives color: self / family / loss
   function lifeEvents(id, lang) {
     const me = get(id);
+    if (!me) return []; // unknown / not-yet-planted person — no life to tell
     const ev = [];
     const nm = pid => fullName(get(pid), lang).split(' ')[0]; // first name
     ev.push({ year: me.birth.year, cat: 'birth', kind: 'self', tier: 'major', label: `Born in ${me.birth.place}`, post: me.birthPost });
@@ -328,6 +331,11 @@
 
   function computeLayout(visibleIds) {
     const vis = (visibleIds instanceof Set) ? visibleIds : new Set(F.people.map(p => p.id));
+    // Empty tree (a fresh start — first person not planted yet): skip the graph
+    // walk entirely and hand back a blank canvas. Math.min/max over no groups
+    // would be Infinity/NaN, so guard before buildGroups.
+    if (!vis.size) return { pos: {}, width: 0, height: 0, minX: 0, maxX: 0, maxY: 0,
+      parentLinks: [], sideLinkGeo: [], NODE_W, ROW_H, maxGen: 0, outsiderIds: [] };
     const { groups, ownerOf, outsiderIds } = buildGroups(vis);
     const groupList = Object.values(groups);
     const groupWidth = g => g.members.length * NODE_W + (g.members.length - 1) * SPOUSE_GAP;

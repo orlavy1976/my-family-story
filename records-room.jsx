@@ -84,6 +84,11 @@ function RrPeopleList({ pid, setPid }) {
         <input className="rr-search" placeholder="Search people…" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
       <div className="rr-lscroll">
+        {!all.length && (
+          <div className="rr-empty rr-empty-list">
+            <p><b>The tree is empty.</b> Add the first person from <b>Edit tree</b> in the top bar — a parent, a grandparent, whoever you know best.</p>
+          </div>
+        )}
         {Object.keys(gens).sort((a, b) => a - b).map((g) => (
           <div key={g}>
             <div className="rr-gen">Gen {g}{g === '0' ? ' · Founders' : ''}</div>
@@ -230,7 +235,10 @@ function RrEvent({ p, e, open, onOpen, onToast }) {
 function RrPerson({ pid, onToast, onJump }) {
   const R = window.REL, S = window.FTStore;
   const p = R.get(pid) || window.FAMILY.people[0];
-  if (!p) return null;
+  if (!p) return <div className="rr-detail"><div className="rr-inner rr-empty">
+    <h1>No one here yet</h1>
+    <p>This record is empty. Plant the first person in <b>Edit tree</b> (top bar), then come back — everyone you add shows up here.</p>
+  </div></div>;
   pid = p.id; // normalize — an unknown pid falls back to the first person
   const name = R.fullName(p, 'en');
   const [openEv, setOpenEv] = React.useState(null);
@@ -489,7 +497,7 @@ window.RecordsRoom = function RecordsRoom({ onClose, onToast, onJump, onOpenPubl
   React.useEffect(() => S.subscribe(bump), []);
   const [screen, setScreen] = React.useState(norm(initScreen) || 'desk');
   React.useEffect(() => { if (initScreen) setScreen(norm(initScreen)); }, [initScreen]);
-  const [pid, setPid] = React.useState(window.FAMILY.people[0].id);
+  const [pid, setPid] = React.useState(() => { const p0 = window.FAMILY.people[0]; return p0 ? p0.id : null; });
   React.useEffect(() => {
     const h = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', h);

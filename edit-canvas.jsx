@@ -157,6 +157,53 @@ function EcNewCard({ anchorId, rel, draftId, pos, onDone, onCancel }) {
   );
 }
 
+// the very first person — no anchor exists yet, so this card stands alone.
+// It creates the person directly in the working copy (gen 0), then normal
+// edit-mode takes over: click their card, hang parents/partners/children off it.
+function EcRootCard({ pos, onDone, onCancel }) {
+  const S = window.FTStore;
+  const [f, setF] = React.useState({ en: '', he: '', sex: 'f', year: '', place: '' });
+  const ok = f.en.trim().length > 0;
+  const commit = () => {
+    if (!ok || !S) return;
+    const R = window.REL;
+    const en = f.en.trim();
+    let id = (en.split(/\s+/)[0] || 'p').toLowerCase().replace(/[^a-z0-9]/g, '') || 'p';
+    while (R.get(id)) id = id + Math.floor(Math.random() * 90 + 10);
+    const year = parseInt(f.year, 10);
+    const seed = { id, gen: 0, sex: f.sex, name: { en: en, he: f.he.trim() || en },
+      birth: { year: (year && String(year).length === 4) ? year : new Date().getFullYear() - 60, place: f.place.trim() },
+      death: null, parents: [], milestones: [], bio: { en: '', he: '' } };
+    S.structAddPerson(seed, en + ' \u00b7 planted the tree');
+    onDone && onDone(id);
+  };
+  return (
+    <div className="ec-card ec-ui ec-root-card" style={{ left: pos.x, top: pos.y }} onPointerDown={(e) => e.stopPropagation()}>
+      <div className="ec-card-head">
+        <span className="ec-badge">First person</span>
+        <span className="ec-of">the seed of the tree</span>
+        <button className="ec-x" onClick={onCancel} title="Cancel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+        </button>
+      </div>
+      <p className="ec-root-lead">Usually the oldest ancestor you know — a grandparent, a great-grandparent. You'll hang the rest of the family off them.</p>
+      <input className="ec-in" placeholder="Full name" value={f.en} onChange={(e) => setF((s) => ({ ...s, en: e.target.value }))} autoFocus
+        onKeyDown={(e) => { if (e.key === 'Enter') commit(); }} />
+      <input className="ec-in dashed he" dir="rtl" placeholder="שם בעברית — optional" value={f.he} onChange={(e) => setF((s) => ({ ...s, he: e.target.value }))} />
+      <div className="ec-row">
+        <div className="ec-seg"><button className={f.sex === 'm' ? 'on' : ''} onClick={() => setF((s) => ({ ...s, sex: 'm' }))}>Male</button><button className={f.sex === 'f' ? 'on' : ''} onClick={() => setF((s) => ({ ...s, sex: 'f' }))}>Female</button></div>
+        <input className="ec-in yr" inputMode="numeric" maxLength="4" placeholder="birth yr" value={f.year}
+          onChange={(e) => setF((s) => ({ ...s, year: e.target.value.replace(/\D/g, '').slice(0, 4) }))} title="Birth year — optional, an estimate keeps them sorted until you know" />
+      </div>
+      <input className="ec-in dashed" placeholder="Birthplace — optional" value={f.place} onChange={(e) => setF((s) => ({ ...s, place: e.target.value }))} />
+      <button className={'ec-add' + (ok ? '' : ' off')} onClick={commit}>
+        <svg width="13" height="13" viewBox="0 0 14 14"><path d="M7 1.5v11M1.5 7h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"></path></svg>
+        Plant the first person
+      </button>
+    </div>
+  );
+}
+
 // one connection pill; clicking expands its actions inline
 function EcPill({ ic, txt, open, onToggle, children }) {
   return (
@@ -301,7 +348,7 @@ function EditLayer({ simRef, nodeEls, nodeH, wrapRef, onOpenFocus }) {
   const sizeRef = React.useRef({ w: 286, h: 420 });
   React.useEffect(() => {
     if (!ui) return;
-    sizeRef.current = ui.type === 'rel' ? { w: 232, h: 300 } : ui.type === 'new' ? { w: 286, h: 430 } : { w: 286, h: 620 };
+    sizeRef.current = ui.type === 'rel' ? { w: 232, h: 300 } : ui.type === 'new' ? { w: 286, h: 430 } : ui.type === 'root' ? { w: 300, h: 420 } : { w: 286, h: 620 };
   }, [ui && ui.type]);
   React.useEffect(() => {
     if (!ui) return;
@@ -321,6 +368,13 @@ function EditLayer({ simRef, nodeEls, nodeH, wrapRef, onOpenFocus }) {
     const { w, h } = sizeRef.current;
     return { x: Math.max(10, Math.min(p.x, wrap.clientWidth - w - 10)),
              y: Math.max(10, Math.min(p.y, wrap.clientHeight - h - 10)) };
+  };
+  // the first-person card sits centred in the viewport
+  const rootCardPos = () => {
+    const wrap = wrapRef.current;
+    const { w, h } = sizeRef.current;
+    if (!wrap) return { x: 20, y: 20 };
+    return { x: Math.max(10, (wrap.clientWidth - w) / 2), y: Math.max(10, (wrap.clientHeight - h) / 2 - 20) };
   };
   const posFor = (id, edge) => {
     const r = rectOf(id); const wrap = wrapRef.current;
@@ -382,6 +436,10 @@ function EditLayer({ simRef, nodeEls, nodeH, wrapRef, onOpenFocus }) {
     return () => wrap.removeEventListener('pointermove', mv);
   }, []);
   React.useEffect(() => {
+    // empty tree → open the first-person card straight away, centred
+    if (R.F.people.length === 0) setUi({ type: 'root', pos: { x: 0, y: 0 } });
+  }, []);
+  React.useEffect(() => {
     const onAdd = (e) => { armedRef.current = e.detail.rel; setUi(null); window.dispatchEvent(new CustomEvent('ft-edit-armed', { detail: e.detail.rel })); };
     const onOpen = (e) => {
       const id = e.detail;
@@ -433,6 +491,8 @@ function EditLayer({ simRef, nodeEls, nodeH, wrapRef, onOpenFocus }) {
   return (
     <div className="ec-layer">
       {plus}
+      {ui && ui.type === 'root' && <EcRootCard pos={rootCardPos()}
+        onDone={(id) => setUi(null)} onCancel={() => setUi(null)} />}
       {ui && ui.type === 'rel' && <EcRelPop anchorId={ui.id} edge={ui.edge} pos={clampPos(ui.pos)}
         onPick={(rel) => startDraft(ui.id, rel)} />}
       {ui && ui.type === 'new' && <EcNewCard anchorId={ui.id} rel={ui.rel} draftId={ui.draftId}

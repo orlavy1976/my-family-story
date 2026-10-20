@@ -2,6 +2,12 @@
 
 All notable changes to **My Family Story** (the app itself, not the family data - the data has its own version counter, the Save chip's v-number).
 
+## v1.1.2 · 2026-10-20
+
+- A cleared/empty tree is now a first-class state: entering Edit tree on a family with no people opens a "First person" card so you can plant the root ancestor (name, Hebrew, sex, birth year, birthplace) - previously every add-path needed an existing person to click.
+- Fixed a crash when opening the Records Room (and computing the tree layout) on an empty record; the desk, People list and person pane now show clear "start here" prompts instead.
+- Layout/scoring guard the zero-people case (no more NaN/Infinity from empty min/max).
+
 ## v1.1.1 · 2026-07-17
 
 - Moved the default avatar to assets/default-avatar.jpg (was uploads/default.jpg); the uploads/ folder is gone from the release.

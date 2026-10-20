@@ -1024,7 +1024,7 @@ function buildConnMeta(layout, showSideLinks, R) {
   layout.parentLinks.forEach((link) => {
     const u = R.F.unions.find((x) => x.id === link.unionId);
     meta.push({ id: 'm' + link.unionId, kind: 'marriage', a: u.a, b: u.b, union: link.unionId, year: link.year, type: link.type,
-      label: link.type === 'partnership' ? `Partners \u00b7 since ${link.year}` : `Married \u00b7 ${link.year}` });
+      label: link.type === 'partnership' ? ('Partners' + (link.year != null ? ` \u00b7 since ${link.year}` : '')) : ('Married' + (link.year != null ? ` \u00b7 ${link.year}` : '')) });
     R.childrenOfUnion(u).forEach((cid) => {
       if (!layout.pos[cid]) return;
       meta.push({ id: 'c' + link.unionId + cid, kind: 'child', a: u.a, b: u.b, child: cid, union: link.unionId, year: link.year });

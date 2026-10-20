@@ -99,9 +99,11 @@
   // ---------- event range ----------
   const allYears = [];
   F.people.forEach(p => { if (p.birth && p.birth.year != null) allYears.push(p.birth.year); if (p.death && p.death.year != null) allYears.push(p.death.year); });
-  F.unions.forEach(u => allYears.push(u.year));
+  F.unions.forEach(u => { if (u.year != null) allYears.push(u.year); });
   // Empty tree → no years yet. Start the window at the current year so the
   // scrubber/timeline stay on a sane, finite scale before the first person lands.
+  // (A union with no year, or a person with no birth year, must not push
+  // undefined — that would make Math.min NaN.)
   const MIN_YEAR = allYears.length ? Math.min(...allYears) : NOW;
   const MAX_YEAR = NOW;
 
